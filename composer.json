@@ -1,0 +1,18 @@
+{
+    "name": "brabot/brasileirao_crawler",
+    "description": "Web scraping project who consumes and displays public data about the brazilian nacional soccer championship",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "brasileiraoCrawler\\src\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Breno Herculano",
+            "email": "brenosouherculano@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}

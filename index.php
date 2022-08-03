@@ -1,35 +1,26 @@
 <?php
 
-// TODO: Duas colunas do header estão vindo vazias (Rank e Clube, provalvelmente problema com childNodes no Xpath)
-// TODO: Gerar arrays com os dados para serem retornadas
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-$fullPageHtml = file_get_contents('https://www.google.com/async/lr_lg_fp?ei=PFTYYuaiMJCb5OUPt9WYkA8&client=opera-gx&yv=3&q=lg|/g/11sfc7_5p3|st|fp&ved=1t:65909&cs=1&async=sp:2,lmid:/m/0fnk7q,tab:st,emid:/g/11sfc7_5p3,rbpt:undefined,ct:,hl:pt-BR,tz:America/Fortaleza,dtoint:2022-07-20T23:30:00Z,dtointmid:/g/11sfc7_5p3,efpri:,_id:liveresults-sports-immersive__league-fullpage,_pms:s,_fmt:pc');
+require_once __DIR__.'/vendor/autoload.php';
+use brasileiraoCrawler\src\Crawler;
 
-$document = new DOMDocument();
-$document->loadHTML($fullPageHtml);
-
-$xpath = new DOMXPath($document);
+$crawler = New Crawler();
 
 /**
- *  @var DOMNode $clubsDomList
- *  @var DOMNode $tableHeadDomList
+ *  @var DOMNodeList $clubsDomList
+ *  @var DOMNodeList $tableHeadDomList
  */
-$clubsDomList      = $xpath->query('.//tr[@class="imso-loa imso-hov"]');
-$tableHeadDomList  = $xpath->query('.//tr/th/div');
+$clubsDomList      = $crawler->getRowsDomList();
+$tableHeadDomList  = $crawler->getHeadersDomList();
 
-/** @var DOMNode $tableHead */
-foreach ($tableHeadDomList as $tableHead) {
-    echo $tableHead->childNodes->item(1)->nodeValue.'<br>';
-}
+echo '<pre>';
+var_dump($crawler->parseDomNodeList($tableHeadDomList));
+exit();
 
-echo '<br>';
-
-/** @var DOMNode $clubDom */
-foreach ($clubsDomList as $clubDom) {
-    echo $clubDom->childNodes->item(1)->nodeValue.'<br>';
-}
 ?>
-
 <!doctype html>
 <html lang="en">
 <head>
