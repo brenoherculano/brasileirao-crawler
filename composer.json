@@ -14,5 +14,9 @@
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "require": {
+      "ext-dom": "*",
+        "ext-libxml": "*",
+        "ext-http": "*"
+    }
 }

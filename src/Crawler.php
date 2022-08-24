@@ -5,8 +5,9 @@ namespace brasileiraoCrawler\src;
 use DOMDocument;
 use DOMNodeList;
 use DOMXPath;
+use http\Exception\InvalidArgumentException;
+use http\Exception\UnexpectedValueException;
 
-// TODO: Duas colunas do header estão vindo vazias (Rank e Clube, provalvelmente problema com childNodes no Xpath)
 // TODO: Gerar arrays com os dados para serem retornadas
 
 /**
@@ -23,11 +24,9 @@ class Crawler
 
     public function __construct()
     {
-        $fullPageHtml = $this->doNewRequest();
-
         $document = new DOMDocument();
         libxml_use_internal_errors(true);
-        $document->loadHTML($fullPageHtml);
+        $document->loadHTML($this->doNewRequest());
         libxml_use_internal_errors(false);
 
         $xpath = new DOMXPath($document);
@@ -48,16 +47,16 @@ class Crawler
                 return $html;
             }
 
-            exit('NOTHING ON RESPONSE');
+            throw new UnexpectedValueException('Response is empty or null');
         }
 
-        exit('MISSING REQUEST URL');
+        throw new InvalidArgumentException('Missing request url');
     }
 
     /**
      * @return DOMNodeList|false
      */
-    public function getHeadersDomList(): DOMNodeList|bool
+    protected function getHeadersDomList(): DOMNodeList|bool
     {
         return $this->headersDomList;
     }
@@ -65,7 +64,7 @@ class Crawler
     /**
      * @return DOMNodeList|false
      */
-    public function getRowsDomList(): DOMNodeList|bool
+    protected function getRowsDomList(): DOMNodeList|bool
     {
         return $this->rowsDomList;
     }
@@ -75,29 +74,32 @@ class Crawler
      * @param bool $checkMultipleChildNodes
      * @return array
      */
-    public function parseDomNodeList(DOMNodeList $DOMNodeList, bool $checkMultipleChildNodes = true): array
+    protected function parseDomNodeList(DOMNodeList $DOMNodeList, bool $checkMultipleChildNodes = true): array
     {
-        $nodeValues = [];
-        $nodeList = $DOMNodeList;
+        if (count($DOMNodeList) !== 0) {
+            $nodeValues = [];
 
-        for ($i = 0; $i < $nodeList->count(); $i++) {
-            $nodeValue = trim($nodeList->item($i)->childNodes->item(0)->nodeValue);
+            for ($i = 0; $i < $DOMNodeList->count(); $i++) {
+                $nodeValue = trim($DOMNodeList->item($i)->childNodes->item(0)->nodeValue);
 
-            if (($checkMultipleChildNodes === true) && $nodeList->item($i)->childNodes->count() > 1) {
-                $nodeValue = [];
+                if (($checkMultipleChildNodes === true) && $DOMNodeList->item($i)->childNodes->count() > 1) {
+                    $nodeValue = [];
 
-                for ($x = 0; $x < $nodeList->item($i)->childNodes->count(); $x++) {
-                    if (!empty($nodeList->item($i)->childNodes->item($x)->nodeValue)) {
-                        $nodeValue[] = trim($nodeList->item($i)->childNodes->item($x)->nodeValue);
+                    for ($x = 0; $x < $DOMNodeList->item($i)->childNodes->count(); $x++) {
+                        if (!empty($DOMNodeList->item($i)->childNodes->item($x)->nodeValue)) {
+                            $nodeValue[] = trim($DOMNodeList->item($i)->childNodes->item($x)->nodeValue);
+                        }
                     }
+                }
+
+                if (!empty($nodeValue)) {
+                    $nodeValues[] = $nodeValue;
                 }
             }
 
-            if (!empty($nodeValue)) {
-                $nodeValues[] = $nodeValue;
-            }
+            return $nodeValues;
         }
 
-        return $nodeValues;
+        throw new InvalidArgumentException('DOM Node List provided is empty');
     }
 }
